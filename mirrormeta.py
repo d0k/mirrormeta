@@ -12,7 +12,7 @@ try:
 	import GeoIP
 	gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
 	hasgeoip = True
-except ImportEror:
+except ImportError:
 	hasgeoip = False
 	
 
