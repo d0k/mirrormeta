@@ -6,7 +6,15 @@
 
 import sys, string
 from os import path
+from urlparse import urlsplit
 import xml.dom.minidom
+try:
+	import GeoIP
+	gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
+	hasgeoip = True
+except ImportEror:
+	hasgeoip = False
+	
 
 if len(sys.argv) == 3:
 	output = sys.stdout
@@ -42,7 +50,12 @@ resources = doc.createElement('resources')
 
 for mirror in mirrors:
 	url = doc.createElement('url')
-	url.setAttribute('type', mirror[:string.find(mirror, '://')])
+	mirrorurl = urlsplit(mirror)
+	url.setAttribute('type', mirrorurl.scheme)
+	if hasgeoip:
+		country = gi.country_code_by_name(mirrorurl.hostname)
+		if country:
+			url.setAttribute('location', country.lower())
 	url.appendChild(doc.createTextNode(mirror+'/'+sys.argv[2]))
 	resources.appendChild(url)
 
