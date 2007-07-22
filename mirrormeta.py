@@ -4,36 +4,42 @@
 # Licensed under GPLv2
 # Uses thirdpartymirrors list from Gentoo Linux (http://gentoo.org/)
 
-import sys, string
+from optparse import OptionParser
 from os import path
+import string
+import sys
 from urlparse import urlsplit
 import xml.dom.minidom
-try:
-	import GeoIP
-	gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-	hasgeoip = True
-except ImportError:
-	hasgeoip = False
-	
 
-if len(sys.argv) == 3:
-	output = sys.stdout
-elif len(sys.argv) == 4:
-	output = open(sys.argv[3], 'w')
-else:
-	sys.stderr.write('mirrormeta.py distributor file [output]\n')
-	sys.stderr.write('e.g. ./mirrormeta.py sourceforge testproject/test.tar.gz testproject.metalink\n\n')
-	sys.stderr.write('if output is left out, mirrormeta.py will write to stdout.\n')
+parser = OptionParser(usage='usage: %prog [options] distributor file\n\te.g. %prog -g sourceforge testproject/test.tar.gz')
+parser.add_option("-o", action="store", type="string", metavar="FILE", dest="filename", help="output file (default: stdout)")
+parser.add_option("-m", action="store", type="string", metavar="FILE", dest="mirrorlist", default="thirdpartymirrors", help="mirror list to use (default: thirdpartymirrors)")
+parser.add_option("-g", action="store_true", dest="hasgeoip", default=False, help="use geoip lookup (if available)")
+(options, args) = parser.parse_args()
+
+if len(args) != 2:
+	parser.print_help()
 	sys.exit(1)
 
-f = open('thirdpartymirrors', 'r')
+if options.hasgeoip:
+	try:
+		import GeoIP
+		gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
+	except ImportError:
+		options.hasgeoip = False
+
+if options.filename:
+	output = open(options.filename, 'w')
+else:
+	output = sys.stdout
+
+f = open(options.mirrorlist, 'r')
 for line in f:
 	mirrors = string.split(line)
-	if mirrors[0] == sys.argv[1]:
+	if mirrors[0] == args[0]:
 		break
 else:
-	sys.stderr.write('%s not found.\n'%sys.argv[1])
-	sys.exit(1)
+	sys.exit('distributor %s not found.'%args[0])
 f.close()
 del mirrors[0]
 
@@ -45,18 +51,18 @@ doc.appendChild(metalink)
 
 files = doc.createElement('files')
 file = doc.createElement('file')
-file.setAttribute('name', path.basename(sys.argv[2]))
+file.setAttribute('name', path.basename(args[1]))
 resources = doc.createElement('resources')
 
 for mirror in mirrors:
 	url = doc.createElement('url')
 	mirrorurl = urlsplit(mirror)
 	url.setAttribute('type', mirrorurl.scheme)
-	if hasgeoip:
+	if options.hasgeoip:
 		country = gi.country_code_by_name(mirrorurl.hostname)
 		if country:
 			url.setAttribute('location', country.lower())
-	url.appendChild(doc.createTextNode(mirror+'/'+sys.argv[2]))
+	url.appendChild(doc.createTextNode(mirror+'/'+args[1]))
 	resources.appendChild(url)
 
 file.appendChild(resources)
@@ -64,3 +70,4 @@ files.appendChild(file)
 metalink.appendChild(files)
 
 output.write(doc.toxml())
+output.write('\n')
