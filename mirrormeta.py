@@ -26,14 +26,14 @@ if options.hasgeoip:
 		import GeoIP
 		gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
 	except ImportError:
-		options.hasgeoip = False
+		sys.exit('GeoIP or GeoIP-python not found!')
 
 if options.filename:
 	output = open(options.filename, 'w')
 else:
 	output = sys.stdout
 
-f = open(options.mirrorlist, 'r')
+f = open(options.mirrorlist)
 for line in f:
 	mirrors = string.split(line)
 	if mirrors[0] == args[0]:
@@ -45,7 +45,7 @@ del mirrors[0]
 
 doc = xml.dom.minidom.Document()
 metalink = doc.createElementNS('http://www.metalinker.org/', 'metalink')
-metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # FIXME: force xmlns in a nicer fashion 
+metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion 
 metalink.setAttribute('version', '3.0')
 doc.appendChild(metalink)
 
