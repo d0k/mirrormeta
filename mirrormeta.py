@@ -11,10 +11,25 @@ import sys
 from urlparse import urlsplit
 import xml.dom.minidom
 
+def createHashNode(parent, hashtype, hashvalue):
+	hash = doc.createElement('hash')
+	hash.setAttribute('type', hashtype)
+	hash.appendChild(doc.createTextNode(hashvalue))
+	parent.appendChild(hash)
+
+def createSigNode(parent, contents):
+	sig = doc.createElement('signature')
+	sig.setAttribute('type', 'pgp')
+	sig.appendChild(doc.createTextNode(contents))
+	parent.appendChild(sig)
+
 parser = OptionParser(usage='usage: %prog [options] distributor file\n\te.g. %prog -g sourceforge testproject/test.tar.gz')
 parser.add_option("-o", action="store", type="string", metavar="FILE", dest="filename", help="output file (default: stdout)")
 parser.add_option("-m", action="store", type="string", metavar="FILE", dest="mirrorlist", default="thirdpartymirrors", help="mirror list to use (default: thirdpartymirrors)")
 parser.add_option("-g", action="store_true", dest="hasgeoip", default=False, help="use geoip lookup (if available)")
+parser.add_option("--md5", action="store", type="string", metavar="SUM", dest="md5sum", help="embed SUM as md5 sum")
+parser.add_option("--sha1", action="store", type="string", metavar="SUM", dest="sha1sum", help="embed SUM as sha1 sum")
+parser.add_option("--sig", action="store", type="string", metavar="FILE", dest="sigfile", help="embed contents of FILE as gpg signature")
 (options, args) = parser.parse_args()
 
 if len(args) != 2:
@@ -66,6 +81,32 @@ for mirror in mirrors:
 	resources.appendChild(url)
 
 file.appendChild(resources)
+
+ver = doc.createElement('verification')
+
+if options.md5sum:
+	if len(options.md5sum) == 32:
+		createHashNode(ver, 'md5', options.md5sum)
+	else:
+		sys.exit('Invalid MD5 sum')
+
+if options.sha1sum:
+	if len(options.sha1sum) == 40:
+		createHashNode(ver, 'sha1', options.sha1sum)
+	else:
+		sys.exit('Invalid SHA1 sum')
+	
+if options.sigfile:
+	try:
+		f = open(options.sigfile)
+	except IOError:
+		sys.exit("Could't open %s."%options.sigfile)
+	else:
+		createSigNode(ver, f.read())
+		f.close()
+
+if ver.hasChildNodes():
+	file.appendChild(ver)
 files.appendChild(file)
 metalink.appendChild(files)
 
