@@ -62,6 +62,7 @@ doc = xml.dom.minidom.Document()
 metalink = doc.createElementNS('http://www.metalinker.org/', 'metalink')
 metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion 
 metalink.setAttribute('version', '3.0')
+metalink.setAttribute('generator', parser.get_prog_name())
 doc.appendChild(metalink)
 
 files = doc.createElement('files')
@@ -107,6 +108,7 @@ if options.sigfile:
 
 if ver.hasChildNodes():
 	file.appendChild(ver)
+
 files.appendChild(file)
 metalink.appendChild(files)
 
