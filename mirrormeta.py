@@ -20,7 +20,7 @@ def createHashNode(parent, hashtype, hashvalue):
 def createSigNode(parent, contents):
 	sig = doc.createElement('signature')
 	sig.setAttribute('type', 'pgp')
-	sig.appendChild(doc.createTextNode(contents))
+	sig.appendChild(doc.createTextNode('\n'+contents))
 	parent.appendChild(sig)
 
 parser = OptionParser(usage='usage: %prog [options] distributor file\n\te.g. %prog -g sourceforge testproject/test.tar.gz')
