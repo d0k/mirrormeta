@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# (c) 2007 by d0k
+# Licensed under GPLv2
+# Uses thirdpartymirrors list from Gentoo Linux (http://gentoo.org/)
 
 from optparse import OptionParser
 import sys

@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+# (c) 2007 by d0k
+# Licensed under GPLv2
 
 from os import path
 import string
