@@ -1,27 +1,8 @@
 #!/usr/bin/env python
-#
-# (c) 2007 by d0k
-# Licensed under GPLv2
-# Uses thirdpartymirrors list from Gentoo Linux (http://gentoo.org/)
 
 from optparse import OptionParser
-from os import path
-import string
 import sys
-from urlparse import urlsplit
-import xml.dom.minidom
-
-def createHashNode(parent, hashtype, hashvalue):
-	hash = doc.createElement('hash')
-	hash.setAttribute('type', hashtype)
-	hash.appendChild(doc.createTextNode(hashvalue))
-	parent.appendChild(hash)
-
-def createSigNode(parent, contents):
-	sig = doc.createElement('signature')
-	sig.setAttribute('type', 'pgp')
-	sig.appendChild(doc.createTextNode('\n'+contents))
-	parent.appendChild(sig)
+from mirrormeta import *
 
 parser = OptionParser(usage='usage: %prog [options] distributor file\n\te.g. %prog -g sourceforge testproject/test.tar.gz')
 parser.add_option("-o", action="store", type="string", metavar="FILE", dest="filename", help="output file (default: stdout)")
@@ -36,81 +17,24 @@ if len(args) != 2:
 	parser.print_help()
 	sys.exit(1)
 
-if options.hasgeoip:
-	try:
-		import GeoIP
-		gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-	except ImportError:
-		sys.exit('GeoIP or GeoIP-python not found!')
-
 if options.filename:
 	output = open(options.filename, 'w')
 else:
 	output = sys.stdout
 
-f = open(options.mirrorlist)
-for line in f:
-	mirrors = string.split(line)
-	if mirrors[0] == args[0]:
-		break
-else:
-	sys.exit('distributor %s not found.'%args[0])
-f.close()
-del mirrors[0]
+mirrorlist = open(options.mirrorlist)
+meta = Metalink(mirrorlist, options.hasgeoip)
 
-doc = xml.dom.minidom.Document()
-metalink = doc.createElementNS('http://www.metalinker.org/', 'metalink')
-metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion 
-metalink.setAttribute('version', '3.0')
-metalink.setAttribute('generator', parser.get_prog_name())
-doc.appendChild(metalink)
-
-files = doc.createElement('files')
-file = doc.createElement('file')
-file.setAttribute('name', path.basename(args[1]))
-resources = doc.createElement('resources')
-
-for mirror in mirrors:
-	url = doc.createElement('url')
-	mirrorurl = urlsplit(mirror)
-	url.setAttribute('type', mirrorurl.scheme)
-	if options.hasgeoip:
-		country = gi.country_code_by_name(mirrorurl.hostname)
-		if country:
-			url.setAttribute('location', country.lower())
-	url.appendChild(doc.createTextNode(mirror+'/'+args[1]))
-	resources.appendChild(url)
-
-file.appendChild(resources)
-
-ver = doc.createElement('verification')
+file = Metalinkfile(meta, args[0], args[1])
 
 if options.md5sum:
-	if len(options.md5sum) == 32:
-		createHashNode(ver, 'md5', options.md5sum)
-	else:
-		sys.exit('Invalid MD5 sum')
+	file.addmd5hash(options.md5sum)
 
 if options.sha1sum:
-	if len(options.sha1sum) == 40:
-		createHashNode(ver, 'sha1', options.sha1sum)
-	else:
-		sys.exit('Invalid SHA1 sum')
-	
+	file.addsha1hash(options.sha1sum)
+
 if options.sigfile:
-	try:
-		f = open(options.sigfile)
-	except IOError:
-		sys.exit("Could't open %s."%options.sigfile)
-	else:
-		createSigNode(ver, f.read())
-		f.close()
+	file.addsigfile(options.sigfile)
 
-if ver.hasChildNodes():
-	file.appendChild(ver)
-
-files.appendChild(file)
-metalink.appendChild(files)
-
-output.write(doc.toxml())
+output.write(meta.toxml())
 output.write('\n')
