@@ -9,6 +9,7 @@ import xml.dom.minidom
 class Metalinkfile:
 	def __init__(self, metalink, distributor, filepath):
 		self.__metalink = metalink
+		metalink.mirrorlist.seek(0)
 		for line in metalink.mirrorlist:
 			mirrors = string.split(line)
 			if mirrors[0] == distributor:
