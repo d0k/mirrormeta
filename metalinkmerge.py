@@ -15,7 +15,7 @@ def parse(doc, outnode):
 dom = xml.dom.minidom.Document()
 
 metalink = dom.createElementNS('http://www.metalinker.org/', 'metalink')
-metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion 
+metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion
 metalink.setAttribute('version', '3.0')
 files = dom.createElement('files')
 

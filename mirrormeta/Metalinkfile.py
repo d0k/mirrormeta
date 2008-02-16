@@ -17,7 +17,7 @@ class Metalinkfile:
 		else:
 			raise Exception('distributor %s not found.'%distributor)
 		del mirrors[0]
-	
+
 		self.file = metalink.doc.createElement('file')
 		self.file.setAttribute('name', path.basename(filepath))
 		resources = metalink.doc.createElement('resources')
@@ -57,7 +57,7 @@ class Metalinkfile:
 		sig.appendChild(self.__metalink.doc.createTextNode('\n'+contents))
 		self.ver.appendChild(sig)
 
-	def addmd5hash(self, hash):		
+	def addmd5hash(self, hash):
 		if len(hash) == 32:
 			self.__createHashNode('md5', hash)
 		else:

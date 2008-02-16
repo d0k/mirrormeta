@@ -9,7 +9,7 @@ class Metalink:
 
 		self.doc = xml.dom.minidom.Document()
 		self.metalink = self.doc.createElementNS('http://www.metalinker.org/', 'metalink')
-		self.metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion 
+		self.metalink.setAttribute('xmlns', 'http://www.metalinker.org/') # TODO: force xmlns in a nicer fashion
 		self.metalink.setAttribute('version', '3.0')
 		self.metalink.setAttribute('generator', __name__)
 		self.doc.appendChild(self.metalink)
