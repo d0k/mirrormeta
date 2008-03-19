@@ -4,7 +4,7 @@
 # concatenates foo.metalink and bar.metalink to merged.metalink
 # All but <file> tags is lost!
 
-import string, sys
+import sys
 import xml.dom.minidom
 
 def parse(doc, outnode):
@@ -21,7 +21,7 @@ files = dom.createElement('files')
 
 doc = sys.stdin.readline()
 for line in sys.stdin:
-	if string.find(line, '<?xml') != -1:
+	if line.find('<?xml') != -1:
 		parse(doc, files)
 		doc = line
 	else:
@@ -31,4 +31,4 @@ parse(doc, files)
 
 metalink.appendChild(files)
 dom.appendChild(metalink)
-print dom.toxml()
+print(dom.toxml())

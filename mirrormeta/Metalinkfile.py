@@ -2,7 +2,6 @@
 # Licensed under GPLv2
 
 from os import path
-import string
 from urlparse import urlsplit
 import xml.dom.minidom
 
@@ -11,7 +10,7 @@ class Metalinkfile:
 		self.__metalink = metalink
 		metalink.mirrorlist.seek(0)
 		for line in metalink.mirrorlist:
-			mirrors = string.split(line)
+			mirrors = line.split()
 			if mirrors[0] == distributor:
 				break
 		else:

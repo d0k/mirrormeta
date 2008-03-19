@@ -1,2 +1,2 @@
-from Metalink import Metalink
-from Metalinkfile import Metalinkfile
+from mirrormeta.Metalink import Metalink
+from mirrormeta.Metalinkfile import Metalinkfile
