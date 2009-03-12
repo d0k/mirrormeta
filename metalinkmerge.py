@@ -32,4 +32,4 @@ parse(doc, files)
 
 metalink.appendChild(files)
 dom.appendChild(metalink)
-print(dom.toxml())
+print dom.toxml()

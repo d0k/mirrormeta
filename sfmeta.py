@@ -7,7 +7,7 @@
 from optparse import OptionParser
 import sys
 from urlparse import urlsplit
-from mirrormeta import *
+import mirrormeta
 
 parser = OptionParser(usage='usage: %prog [options] sf.net URL [sf.net URL] [...]')
 parser.add_option("-o", action="store", type="string", metavar="FILE",
@@ -27,11 +27,11 @@ else:
     output = sys.stdout
 
 mirrorlist = open(options.mirrorlist)
-meta = Metalink(mirrorlist, True)
+meta = mirrormeta.metalink(mirrorlist, True)
 
 for arg in args:
     url = urlsplit(arg)
-    file = Metalinkfile(meta, 'sourceforge', url.path[1:])
+    file = mirrormeta.metalink_file(meta, 'sourceforge', url.path[1:])
 
 output.write(meta.toxml())
 output.write('\n')
